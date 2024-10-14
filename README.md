@@ -6,7 +6,9 @@
         <pre><code>SPOTIFY_CLIENT_ID='' 
 SPOTIFY_CLIENT_SECRET=''</code></pre>
     </li>
+</ol>
 
+<ol>
     <li>
         <p><strong>Installer les dépendances :</strong></p>
         <pre><code>composer install</code></pre>
