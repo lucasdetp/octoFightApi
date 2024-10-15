@@ -20,6 +20,16 @@ class RapperController extends Controller
             $defense = ($rapper->followers * 0.00003) + ($rapper->popularity * 0.2);
             $defense = min($defense, $maxDefense);
 
+            if ($rapper->popularity >= 75) {
+                $rarity = 'légendaire';
+            }elseif ($rapper->popularity >= 65 && $rapper->popularity <= 74) {
+                $rarity = 'épique';
+            }elseif ($rapper->popularity >= 55 && $rapper->popularity <= 64) {
+                $rarity = 'rare';
+            }else {
+                $rarity = 'commun';
+            }
+
             return [
                 'id' => $rapper->id,
                 'name' => $rapper->name,
@@ -27,6 +37,7 @@ class RapperController extends Controller
                 'popularity' => $rapper->popularity,
                 'attaque' => round($attaque, 2),   
                 'defense' => round($defense, 2),   
+                'rarity' => $rarity,
             ];
         });
 
