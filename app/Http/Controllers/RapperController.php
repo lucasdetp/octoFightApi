@@ -118,12 +118,12 @@ class RapperController extends Controller
         if ($rapper->popularity >= 75) {
             $popularityFactor = $rapper->popularity * 5;
             $price = $basePrice + $popularityFactor + $followerFactor;
-            return max($price, 600);  
+            return max($price, 3000);  
         } elseif ($rapper->popularity >= 65 && $rapper->popularity <= 74) {
 
             $popularityFactor = $rapper->popularity * 4.5; 
             $price = $basePrice + $popularityFactor + $followerFactor;
-            return max($price, 400);  
+            return max($price, 1500);  
         } elseif ($rapper->popularity >= 55 && $rapper->popularity <= 64) {
             $adjustmentFactor = 1;
             if ($rapper->followers < 500000) {
