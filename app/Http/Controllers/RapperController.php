@@ -22,11 +22,11 @@ class RapperController extends Controller
 
             if ($rapper->popularity >= 75) {
                 $rarity = 'légendaire';
-            }elseif ($rapper->popularity >= 65 && $rapper->popularity <= 74) {
+            } elseif ($rapper->popularity >= 65) {
                 $rarity = 'épique';
-            }elseif ($rapper->popularity >= 55 && $rapper->popularity <= 64) {
+            } elseif ($rapper->popularity >= 55) {
                 $rarity = 'rare';
-            }else {
+            } else {
                 $rarity = 'commun';
             }
 
@@ -35,14 +35,21 @@ class RapperController extends Controller
                 'name' => $rapper->name,
                 'image_url' => $rapper->image_url,
                 'popularity' => $rapper->popularity,
-                'attaque' => round($attaque, 2),   
-                'defense' => round($defense, 2),   
+                'attaque' => round($attaque, 2),
+                'defense' => round($defense, 2),
                 'rarity' => $rarity,
             ];
         });
 
-        return response()->json($rappers);
+        $rarityOrder = ['légendaire' => 1, 'épique' => 2, 'rare' => 3, 'commun' => 4];
+
+        $sortedRappers = $rappers->sortBy(function($rapper) use ($rarityOrder) {
+            return $rarityOrder[$rapper['rarity']];
+        })->values(); 
+
+        return response()->json($sortedRappers);
     }
+
 
     public function getRapper($id)
     {
