@@ -91,17 +91,21 @@ class RapperController extends Controller
         $rapper = Rapper::find($rapperId);
 
         if (!$rapper) {
-            return response()->json(['error' => 'Rapper not found'], 404);
+            return response()->json(['error' => "Le rappeur n'a pas été trouvé"], 404);
+        }
+
+        if ($user->rappers()->where('rapper_id', $rapperId)->exists()) {
+            return response()->json(['error' => "Vous avez déjà acheté ce rappeur"], 400);
+        }
+
+        if ($rapper->users()->exists()) {
+            return response()->json(['error' => 'Ce rappeur a déjà été acheté par un autre utilisateur'], 400);
         }
 
         $price = $this->getRapperPrice($rapper);
 
         if ($user->credit && $user->credit < $price) {
-            return response()->json(['error' => 'Not enough credits'], 400);
-        }
-
-        if ($user->rappers()->where('rapper_id', $rapperId)->exists()) {
-            return response()->json(['error' => 'You already own this rapper'], 400);
+            return response()->json(['error' => "Vous n'avez pas assez de crédits"], 400);
         }
 
         $user->credit -= $price;
@@ -110,7 +114,7 @@ class RapperController extends Controller
         $user->rappers()->attach($rapperId);
 
         return response()->json([
-            'message' => 'Rapper purchased successfully!',
+            'message' => 'Rappeur achété avec succès',
             'rapper' => $rapper,
             'remaining_credit' => $user->credit,
         ]);

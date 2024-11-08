@@ -8,12 +8,11 @@ use App\Http\Controllers\UserController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/rappers', [RapperController::class, 'getRappers']);
-Route::middleware('auth:sanctum')->post('/buy-rapper', [RapperController::class, 'buyRapper']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rapper/{id}', [RapperController::class, 'getRapper']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'user']);
-    Route::middleware('auth:sanctum')->get('/user', [UserController::class, 'getUser']);
-    Route::middleware('auth:sanctum')->post('/user/change-password', [UserController::class, 'changePassword']);
+    Route::get('/user', [UserController::class, 'getUser']);
+    Route::post('/user/change-password', [UserController::class, 'changePassword']);
+    Route::post('/buy-rapper', [RapperController::class, 'buyRapper']);
 });
