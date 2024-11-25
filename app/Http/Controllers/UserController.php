@@ -36,4 +36,10 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Mot de passe mis à jour avec succès.'], 200);
     }
+
+    public function getCredits()
+    {
+        $user = Auth::user();
+        return response()->json(['credits' => $user->credits]);
+    }
 }
