@@ -68,6 +68,6 @@ class User extends Authenticatable
 
     public function rappers()
     {
-        return $this->belongsToMany(Rapper::class, 'rapper_user');
+        return $this->belongsToMany(Rapper::class, 'rapper_user', 'user_id', 'rapper_id');
     }
 }
