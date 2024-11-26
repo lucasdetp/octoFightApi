@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'getUser']);
     Route::post('/user/change-password', [UserController::class, 'changePassword']);
     Route::post('/buy-rapper', [RapperController::class, 'buyRapper']);
+    Route::get('/user/credits', [UserController::class, 'getCredits']);
+    Route::get('/user/deck', [UserController::class, 'getDeck']);
     Route::post('/battle/invite', [BattleController::class, 'invite']);
     Route::post('/battle/{id}/accept', [BattleController::class, 'acceptBattle']);
     Route::post('/battle/{id}/decline', [BattleController::class, 'declineBattle']);
