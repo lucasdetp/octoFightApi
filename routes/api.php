@@ -16,4 +16,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/change-password', [UserController::class, 'changePassword']);
     Route::post('/buy-rapper', [RapperController::class, 'buyRapper']);
     Route::get('/user/credits', [UserController::class, 'getCredits']);
+    Route::get('/user/deck', [UserController::class, 'getDeck']);
 });

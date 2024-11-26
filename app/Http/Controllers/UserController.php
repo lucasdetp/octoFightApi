@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User; // Import du modèle User
+use App\Models\User;
+use App\Models\Rapper;
 
 class UserController extends Controller
 {
@@ -41,5 +42,46 @@ class UserController extends Controller
     {
         $user = Auth::user();
         return response()->json(['credits' => $user->credits]);
+    }
+
+    public function getDeck(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Utilisateur non authentifié'], 401);
+        }
+
+        $maxAttack = 100;
+        $maxDefense = 100;
+
+        $deck = $user->rappers->map(function ($rapper) use ($maxAttack, $maxDefense) {
+            $attaque = ($rapper->popularity * 1.1) + ($rapper->followers / 1500000);
+            $attaque = min($attaque, $maxAttack);
+
+            $defense = ($rapper->followers * 0.00003) + ($rapper->popularity * 0.2);
+            $defense = min($defense, $maxDefense);
+
+            if ($rapper->popularity >= 75) {
+                $rarity = 'légendaire';
+            } elseif ($rapper->popularity >= 65) {
+                $rarity = 'épique';
+            } elseif ($rapper->popularity >= 55) {
+                $rarity = 'rare';
+            } else {
+                $rarity = 'commun';
+            }
+
+            return [
+                'id' => $rapper->id,
+                'name' => $rapper->name,
+                'image_url' => $rapper->image_url,
+                'popularity' => $rapper->popularity,
+                'attaque' => round($attaque, 2),
+                'defense' => round($defense, 2),
+                'rarity' => $rarity,
+            ];
+        });
+
+        return response()->json($deck);
     }
 }
