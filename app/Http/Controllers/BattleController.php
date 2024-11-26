@@ -33,9 +33,46 @@ class BattleController extends Controller
         return response()->json(['battle' => $battle], 201);
     }
 
+    public function getActiveBattleForUser($userId)
+    {
+        $battle = Battle::where(function ($query) use ($userId) {
+                $query->where('user1_id', $userId)
+                    ->orWhere('user2_id', $userId);
+            })
+            ->whereIn('status', ['accepted']) 
+            ->first();
+
+        if ($battle) {
+            $selectedRapper = null;
+
+            if ($battle->user1_id == $userId) {
+                $selectedRapper = $battle->user1_rapper_id; 
+            } elseif ($battle->user2_id == $userId) {
+                $selectedRapper = $battle->user2_rapper_id; 
+            }
+
+            if ($selectedRapper) {
+                return response()->json([
+                    'battle' => null,
+                ]);
+            }
+
+            return response()->json([
+                'battle' => [
+                    'id' => $battle->id,
+                    'status' => $battle->status,
+                ],
+            ]);
+        }
+
+        return response()->json([
+            'battle' => null,
+        ]);
+    }
+
+
 
     // Accepter une invitation
-   // Accepter une invitation
 public function acceptBattle($battleId, Request $request)
 {
     $battle = Battle::findOrFail($battleId);
@@ -78,11 +115,6 @@ public function chooseRapper($battleId, Request $request)
     }
 
     $battle->save();
-
-    // Notifier si les deux rappeurs sont choisis
-    if ($battle->user1_rapper_id && $battle->user2_rapper_id) {
-        event(new \App\Events\BattleReady($battle));
-    }
 
     return response()->json(['message' => 'Rappeur choisi avec succès']);
 }
