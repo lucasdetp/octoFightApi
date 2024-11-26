@@ -13,6 +13,6 @@ class Rapper extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'rapper_user');
+        return $this->belongsToMany(User::class, 'rapper_user', 'rapper_id', 'user_id');
     }
 }

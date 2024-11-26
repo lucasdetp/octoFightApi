@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Battle;
+use App\Observers\BattleObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (!class_exists(BattleObserver::class)) {
+            logger('BattleObserver not found! ERROR');
+        }
+        Battle::observe(BattleObserver::class);
         Schema::defaultStringLength(191); // Définir la longueur des chaînes à 191
     }
 }
