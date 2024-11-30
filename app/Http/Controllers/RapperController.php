@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rapper;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RapperController extends Controller
 {
@@ -13,8 +15,8 @@ class RapperController extends Controller
         $maxAttack = 100;
         $maxDefense = 100;
 
-        $rappers = Rapper::all()->map(function($rapper) use ($maxAttack, $maxDefense) {
-            $attaque = ($rapper->popularity * 1.1) + ($rapper->followers / 1500000); 
+        $rappers = Rapper::all()->map(function ($rapper) use ($maxAttack, $maxDefense) {
+            $attaque = ($rapper->popularity * 1.1) + ($rapper->followers / 1500000);
             $attaque = min($attaque, $maxAttack);
 
             $defense = ($rapper->followers * 0.00003) + ($rapper->popularity * 0.2);
@@ -35,6 +37,7 @@ class RapperController extends Controller
                 'name' => $rapper->name,
                 'image_url' => $rapper->image_url,
                 'popularity' => $rapper->popularity,
+                'followers' => $rapper->followers,
                 'attaque' => round($attaque, 2),
                 'defense' => round($defense, 2),
                 'rarity' => $rarity,
@@ -43,9 +46,9 @@ class RapperController extends Controller
 
         $rarityOrder = ['légendaire' => 1, 'épique' => 2, 'rare' => 3, 'commun' => 4];
 
-        $sortedRappers = $rappers->sortBy(function($rapper) use ($rarityOrder) {
+        $sortedRappers = $rappers->sortBy(function ($rapper) use ($rarityOrder) {
             return $rarityOrder[$rapper['rarity']];
-        })->values(); 
+        })->values();
 
         return response()->json($sortedRappers);
     }
@@ -62,7 +65,7 @@ class RapperController extends Controller
             return response()->json(['error' => 'Rappeur non trouvé'], 404);
         }
 
-        $attaque = ($rapper->popularity * 1.1) + ($rapper->followers / 1500000); 
+        $attaque = ($rapper->popularity * 1.1) + ($rapper->followers / 1500000);
         $attaque = min($attaque, $maxAttack);
 
         $defense = ($rapper->followers * 0.00003) + ($rapper->popularity * 0.2);
@@ -79,10 +82,60 @@ class RapperController extends Controller
         ]);
     }
 
+    public function getPurchasedRappers($userId)
+    {
+        try {
+            $maxAttack = 100;
+            $maxDefense = 100;
+
+            $rapperIds = DB::table('rapper_user')
+                ->where('user_id', $userId)
+                ->pluck('rapper_id');
+
+            if ($rapperIds->isEmpty()) {
+                return response()->json(['message' => 'Aucun rappeur acheté trouvé.'], 404);
+            }
+
+            $rappers = Rapper::whereIn('id', $rapperIds)->get()->map(function ($rapper) use ($maxAttack, $maxDefense) {
+                $attaque = ($rapper->popularity * 1.1) + ($rapper->followers / 1500000);
+                $attaque = min($attaque, $maxAttack);
+
+                $defense = ($rapper->followers * 0.00003) + ($rapper->popularity * 0.2);
+                $defense = min($defense, $maxDefense);
+
+                if ($rapper->popularity >= 75) {
+                    $rarity = 'légendaire';
+                } elseif ($rapper->popularity >= 65) {
+                    $rarity = 'épique';
+                } elseif ($rapper->popularity >= 55) {
+                    $rarity = 'rare';
+                } else {
+                    $rarity = 'commun';
+                }
+
+                return [
+                    'id' => $rapper->id,
+                    'name' => $rapper->name,
+                    'image_url' => $rapper->image_url,
+                    'popularity' => $rapper->popularity,
+                    'followers' => $rapper->followers,
+                    'attaque' => round($attaque, 2),
+                    'defense' => round($defense, 2),
+                    'rarity' => $rarity,
+                ];
+            });
+
+            return response()->json($rappers, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erreur lors de la récupération des rappeurs achetés.'], 500);
+        }
+    }
+
+
     public function buyRapper(Request $request)
     {
         $user = Auth::user();
-        
+
         if (!$user) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
@@ -116,7 +169,7 @@ class RapperController extends Controller
         return response()->json([
             'message' => 'Rappeur achété avec succès',
             'rapper' => $rapper,
-            'remaining_credit' => $user->credit,
+            'updatedCredits' => $user->credit,
         ]);
     }
 
@@ -129,28 +182,27 @@ class RapperController extends Controller
         if ($rapper->popularity >= 75) {
             $popularityFactor = $rapper->popularity * 5;
             $price = $basePrice + $popularityFactor + $followerFactor;
-            return max($price, 3000);  
+            return max($price, 3000);
         } elseif ($rapper->popularity >= 65 && $rapper->popularity <= 74) {
 
-            $popularityFactor = $rapper->popularity * 4.5; 
+            $popularityFactor = $rapper->popularity * 4.5;
             $price = $basePrice + $popularityFactor + $followerFactor;
-            return max($price, 1500);  
+            return max($price, 1500);
         } elseif ($rapper->popularity >= 55 && $rapper->popularity <= 64) {
             $adjustmentFactor = 1;
             if ($rapper->followers < 500000) {
-                $adjustmentFactor = 0.6;  
+                $adjustmentFactor = 0.6;
             } elseif ($rapper->followers >= 500000 && $rapper->followers <= 1000000) {
-                $adjustmentFactor = 0.8;  
+                $adjustmentFactor = 0.8;
             }
 
             $popularityFactor = $rapper->popularity * 3.5;
             $price = ($basePrice + $popularityFactor + $followerFactor) * $adjustmentFactor;
-            return min($price, 300); 
+            return min($price, 300);
         } else {
-            $popularityFactor = $rapper->popularity * 2.5; 
+            $popularityFactor = $rapper->popularity * 2.5;
             $price = $basePrice + $popularityFactor + $followerFactor;
-            return max(50, min($price, 150)); 
+            return max(50, min($price, 150));
         }
     }
-
 }
