@@ -36,9 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/battle/{id}/decline', [BattleController::class, 'declineBattle']);
     Route::post('/battle/{id}/resolve', [BattleController::class, 'resolveBattle']);
 
-    // Route::get('/user/{userId}/rappers', [UserController::class, 'getRappers']);
+    Route::get('/user/{userId}/rappers', [UserController::class, 'getRappers']);
+
     Route::post('/battle/{battleId}/choose-rapper', [BattleController::class, 'chooseRapper']);
     Route::get('/user/{userId}/battle', [BattleController::class, 'getActiveBattleForUser']);
-    Route::get('/user/{userId}/rappers', [RapperController::class, 'getPurchasedRappers']);
+    Route::get('/user/{userId}/my-rappers', [RapperController::class, 'getPurchasedRappers']);
     Route::get('/rapper/{rapperId}/price', [RapperController::class, 'getRapperPrice']);
 });

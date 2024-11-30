@@ -26,17 +26,17 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    // public function getRappers($userId)
-    // {
-    //     $user = User::find($userId);
+    public function getRappers($userId)
+    {
+        $user = User::find($userId);
 
-    //     if (!$user) {
-    //         return response()->json(['error' => 'Utilisateur non trouvé'], 404);
-    //     }
+        if (!$user) {
+            return response()->json(['error' => 'Utilisateur non trouvé'], 404);
+        }
 
-    //     $rappers = $user->rappers;
-    //     return response()->json(['rappers' => $rappers], 200);
-    // }
+        $rappers = $user->rappers;
+        return response()->json(['rappers' => $rappers], 200);
+    }
 
 
     public function changePassword(Request $request)
